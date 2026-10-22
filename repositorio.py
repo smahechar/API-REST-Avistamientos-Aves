@@ -1,5 +1,6 @@
 """Acceso a datos: único lugar que conoce SQLite."""
 import sqlite3
+from contextlib import contextmanager
 
 _CAMPOS = ('especie', 'lugar', 'fecha', 'observador')
 
@@ -16,10 +17,19 @@ class RepositorioSQLite:
                 observador TEXT NOT NULL
             )''')
 
+    @contextmanager
     def _conectar(self):
+        """Abre una conexión, confirma (o revierte) la transacción y SIEMPRE la cierra.
+
+        `with sqlite3.connect(...)` solo confirma/revierte; no cierra la conexión.
+        """
         conexion = sqlite3.connect(self._ruta)
         conexion.row_factory = sqlite3.Row
-        return conexion
+        try:
+            with conexion:
+                yield conexion
+        finally:
+            conexion.close()
 
     def listar(self) -> list:
         with self._conectar() as conexion:
