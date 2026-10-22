@@ -1,6 +1,6 @@
 # API REST de avistamientos de aves
 
-Trabajo individual de Ingeniería de Software 2, sesión 17. API desarrollada con Python, Flask y SQLite. La base de datos se crea automáticamente al iniciar.
+Trabajo individual de Ingeniería de Software 2 (sesión 17), ampliado con pruebas unitarias y de integración en el taller de la sesión 22. API desarrollada con Python, Flask y SQLite. La base de datos se crea automáticamente al iniciar.
 
 ## Requisitos
 
@@ -96,11 +96,58 @@ Ejemplo de respuesta:
 
 **Nota sobre PowerShell:** sus reglas de comillas pueden dificultar el envío de JSON con `curl.exe`. Puedes usar la terminal Git Bash de VS Code para copiar los comandos anteriores sin modificaciones, o usar `Invoke-RestMethod` con `-Body ($datos | ConvertTo-Json)`.
 
+## Regla de negocio (validación)
+
+Un avistamiento es válido si:
+
+- `especie` tiene entre 3 y 50 caracteres (se miden sin espacios en los extremos).
+- `fecha` tiene formato `AAAA-MM-DD`, existe en el calendario y no es posterior a hoy.
+- `lugar` y `observador` no están vacíos.
+
+Si no es válido, `POST` y `PUT` responden **400** con el campo que falló:
+
+```json
+{"campo": "especie", "error": "especie: debe tener entre 3 y 50 caracteres."}
+```
+
+## Estructura del código
+
+| Archivo | Responsabilidad |
+|---|---|
+| `app.py` | Capa HTTP (rutas y traducción de errores a códigos) |
+| `servicio.py` | Casos de uso: coordina validador y repositorio |
+| `validador.py` | Regla de negocio (`ValidadorDeAvistamiento`), lógica pura |
+| `repositorio.py` | Acceso a SQLite |
+| `reloj.py` | Abstracción de "hoy" (para poder usar un reloj fijo en pruebas) |
+
 ## Pruebas automatizadas
+
+Ejecutar todas las pruebas:
 
 ```bash
 python -m pytest -v
 ```
+
+Solo unitarias o solo de integración:
+
+```bash
+python -m pytest tests/unit -v
+python -m pytest tests/integration -v
+```
+
+Generar el reporte de cobertura (líneas y ramas) en la terminal:
+
+```bash
+python -m pytest --cov --cov-report=term-missing
+```
+
+Reporte HTML (se abre `htmlcov/index.html`):
+
+```bash
+python -m pytest --cov --cov-report=html
+```
+
+La justificación de las decisiones de prueba está en [`docs/justificacion-pruebas.md`](docs/justificacion-pruebas.md).
 
 ## Base de datos
 

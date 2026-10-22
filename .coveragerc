@@ -1,0 +1,10 @@
+[run]
+branch = True
+source = .
+omit =
+    tests/*
+    cargar_ejemplos.py
+    .venv/*
+
+[report]
+show_missing = True
