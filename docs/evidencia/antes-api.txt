@@ -1,0 +1,19 @@
+GET    /avistamientos             -> 200  []
+POST   /avistamientos             -> 201  {"especie": "Colibrí", "fecha": "2026-09-29", "id": 1, "lugar": "Bogotá", "observador": "Ana"}
+POST   /avistamientos             -> 201  {"especie": "Garza blanca", "fecha": "2026-10-21", "id": 2, "lugar": "Bogotá", "observador": "Ana"}
+POST   /avistamientos             -> 400  {"campo": "especie", "error": "especie: debe tener entre 3 y 50 caracteres."}
+POST   /avistamientos             -> 400  {"campo": "fecha", "error": "fecha: no puede ser posterior a hoy."}
+POST   /avistamientos             -> 400  {"campo": "fecha", "error": "fecha: no es una fecha real del calendario."}
+POST   /avistamientos             -> 400  {"campo": "fecha", "error": "fecha: es obligatorio y debe ser un texto no vacío."}
+POST   /avistamientos             -> 400  {"campo": "cuerpo", "error": "cuerpo: se requiere un objeto JSON."}
+GET    /avistamientos             -> 200  [{"especie": "Colibrí", "fecha": "2026-09-29", "id": 1, "lugar": "Bogotá", "observador": "Ana"}, {"especie": "Garza blanca", "fecha": "2026-10-21", "id": 2, "lugar": "Bogotá", "observador": "Ana"}]
+GET    /avistamientos/1           -> 200  {"especie": "Colibrí", "fecha": "2026-09-29", "id": 1, "lugar": "Bogotá", "observador": "Ana"}
+GET    /avistamientos/999         -> 404  {"error": "Avistamiento no encontrado."}
+GET    /avistamientos/resumen     -> 200  [{"cantidad": 1, "especie": "Colibrí"}, {"cantidad": 1, "especie": "Garza blanca"}]
+PUT    /avistamientos/1           -> 200  {"especie": "Garza blanca", "fecha": "2026-09-29", "id": 1, "lugar": "Bogotá", "observador": "Ana"}
+PUT    /avistamientos/1           -> 400  {"campo": "observador", "error": "observador: es obligatorio y debe ser un texto no vacío."}
+PUT    /avistamientos/999         -> 404  {"error": "Avistamiento no encontrado."}
+GET    /avistamientos/resumen     -> 200  [{"cantidad": 2, "especie": "Garza blanca"}]
+DELETE /avistamientos/1           -> 204  (sin cuerpo)
+DELETE /avistamientos/1           -> 404  {"error": "Avistamiento no encontrado."}
+GET    /avistamientos             -> 200  [{"especie": "Garza blanca", "fecha": "2026-10-21", "id": 2, "lugar": "Bogotá", "observador": "Ana"}]

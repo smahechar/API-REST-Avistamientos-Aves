@@ -4,6 +4,7 @@ source = .
 omit =
     tests/*
     cargar_ejemplos.py
+    herramientas/*
     .venv/*
 
 [report]
