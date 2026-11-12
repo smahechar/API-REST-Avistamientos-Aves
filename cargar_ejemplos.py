@@ -1,9 +1,12 @@
-"""Carga avistamientos ficticios en SQLite sin eliminar datos existentes.
+"""Carga avistamientos ficticios sin eliminar datos existentes.
+
+Es un segundo adaptador primario (un script por lotes): conduce la aplicación por el mismo
+puerto de entrada que usa HTTP, así los ejemplos pasan por la misma regla de negocio.
+Ya no escribe SQL propio.
 
 Ejecutar: python cargar_ejemplos.py
 """
-from app import app
-import sqlite3
+from app import app, construir_servicio
 
 EJEMPLOS = [
     ('Cóndor de los Andes', 'Parque Nacional Natural Los Nevados, Tolima', '2026-08-02', 'Mariana Torres'),
@@ -26,24 +29,23 @@ EJEMPLOS = [
     ('Colibrí', 'Parque Nacional Natural Chingaza, Cundinamarca', '2026-10-08', 'Alejandra Muñoz'),
 ]
 
+CAMPOS = ('especie', 'lugar', 'fecha', 'observador')
+
+
 def cargar():
     ruta = app.config['DATABASE']
-    with sqlite3.connect(ruta) as conexion:
-        antes = conexion.total_changes
-        for especie, lugar, fecha, observador in EJEMPLOS:
-            # Evitar insertar dos veces exactamente el mismo ejemplo.
-            existe = conexion.execute(
-                '''SELECT 1 FROM avistamientos
-                   WHERE especie=? AND lugar=? AND fecha=? AND observador=? LIMIT 1''',
-                (especie, lugar, fecha, observador),
-            ).fetchone()
-            if not existe:
-                conexion.execute('''INSERT INTO avistamientos
-                    (especie, lugar, fecha, observador) VALUES (?, ?, ?, ?)''',
-                    (especie, lugar, fecha, observador))
-        creados = conexion.total_changes - antes
+    gestion = construir_servicio(ruta)
+    # Evitar insertar dos veces exactamente el mismo ejemplo.
+    existentes = {tuple(a[c] for c in CAMPOS) for a in gestion.listar()}
+    creados = 0
+    for ejemplo in EJEMPLOS:
+        if ejemplo not in existentes:
+            gestion.crear(dict(zip(CAMPOS, ejemplo)))
+            existentes.add(ejemplo)
+            creados += 1
     print(f'Se agregaron {creados} avistamientos de ejemplo en {ruta}.')
     print('No se eliminaron los registros anteriores. Los ejemplos son ficticios.')
+
 
 if __name__ == '__main__':
     cargar()
