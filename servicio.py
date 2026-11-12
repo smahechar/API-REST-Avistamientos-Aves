@@ -1,8 +1,5 @@
 """Casos de uso: coordina validador y repositorio. No conoce HTTP."""
-
-
-class NoEncontrado(Exception):
-    """No existe un avistamiento con ese id."""
+from avistamientos.hexagono.errores import NoEncontrado
 
 
 class ServicioDeAvistamientos:
