@@ -1,9 +1,3 @@
-"""Abstracción del reloj. Permite probar reglas que dependen de "hoy"."""
-from datetime import date
-
-
-class RelojDelSistema:
-    """Implementación real: devuelve la fecha actual del sistema."""
-
-    def hoy(self) -> date:
-        return date.today()
+"""Módulo puente TEMPORAL: el reloj real se movió a
+avistamientos/adaptadores/secundarios/reloj_sistema.py."""
+from avistamientos.adaptadores.secundarios.reloj_sistema import RelojDelSistema  # noqa: F401
