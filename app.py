@@ -1,66 +1,36 @@
-"""Capa HTTP: solo traduce peticiones a llamadas del servicio y errores a códigos."""
+"""Punto de arranque (raíz de composición): arma el hexágono con sus adaptadores.
+
+Es el único módulo que conoce a la vez el hexágono y todos los adaptadores. Elige qué adaptador
+se conecta a cada puerto: SQLite al repositorio, el reloj del sistema (o uno fijo, en las pruebas)
+al reloj, y Flask al puerto de entrada.
+"""
 from pathlib import Path
 import os
 
-from flask import Flask, jsonify, request
+from avistamientos.adaptadores.primarios.http_flask import crear_aplicacion_flask
+from avistamientos.adaptadores.secundarios.reloj_sistema import RelojDelSistema
+from avistamientos.adaptadores.secundarios.repositorio_sqlite import RepositorioSQLite
+from avistamientos.hexagono.puertos import GestionDeAvistamientos, Reloj
+from avistamientos.hexagono.servicio import ServicioDeAvistamientos
+from avistamientos.hexagono.validacion import ValidadorDeAvistamiento
 
-from repositorio import RepositorioSQLite
-from reloj import RelojDelSistema
-from servicio import NoEncontrado, ServicioDeAvistamientos
-from validador import ErrorDeValidacion, ValidadorDeAvistamiento
+RUTA_BD_POR_DEFECTO = str(Path(__file__).parent / 'avistamientos.db')
 
 
-def crear_app(config=None, reloj=None):
-    app = Flask(__name__)
-    # Mostrar caracteres como á, ñ y ü en lugar de secuencias Unicode.
-    app.json.ensure_ascii = False
-    # JSON con saltos de línea y sangría para facilitar su lectura.
-    app.json.compact = False
-    app.config['DATABASE'] = os.environ.get('DATABASE_PATH', str(Path(__file__).parent / 'avistamientos.db'))
-    if config:
-        app.config.update(config)
-
-    servicio = ServicioDeAvistamientos(
-        RepositorioSQLite(app.config['DATABASE']),
+def construir_servicio(ruta_bd: str, reloj: Reloj = None) -> GestionDeAvistamientos:
+    """Conecta los adaptadores secundarios a los puertos de salida y devuelve el puerto de entrada."""
+    return ServicioDeAvistamientos(
+        RepositorioSQLite(ruta_bd),
         ValidadorDeAvistamiento(reloj or RelojDelSistema()),
     )
 
-    @app.errorhandler(ErrorDeValidacion)
-    def _validacion(error):
-        return jsonify(error=str(error), campo=error.campo), 400
 
-    @app.errorhandler(NoEncontrado)
-    def _no_encontrado(_error):
-        return jsonify(error='Avistamiento no encontrado.'), 404
-
-    @app.get('/avistamientos')
-    def listar():
-        return jsonify(servicio.listar()), 200
-
-    @app.get('/avistamientos/resumen')
-    def resumen():
-        return jsonify(servicio.resumen()), 200
-
-    @app.get('/avistamientos/<int:identificador>')
-    def consultar(identificador):
-        return jsonify(servicio.consultar(identificador)), 200
-
-    @app.post('/avistamientos')
-    def crear():
-        datos = request.get_json(silent=True)
-        return jsonify(servicio.crear(datos)), 201
-
-    @app.put('/avistamientos/<int:identificador>')
-    def actualizar(identificador):
-        datos = request.get_json(silent=True)
-        return jsonify(servicio.actualizar(identificador, datos)), 200
-
-    @app.delete('/avistamientos/<int:identificador>')
-    def eliminar(identificador):
-        servicio.eliminar(identificador)
-        return '', 204
-
-    return app
+def crear_app(config=None, reloj=None):
+    configuracion = {'DATABASE': os.environ.get('DATABASE_PATH', RUTA_BD_POR_DEFECTO)}
+    if config:
+        configuracion.update(config)
+    servicio = construir_servicio(configuracion['DATABASE'], reloj)
+    return crear_aplicacion_flask(servicio, configuracion)
 
 
 app = crear_app()
