@@ -1,7 +1,12 @@
-"""Dobles de prueba compartidos por las pruebas unitarias e de integración."""
+"""Dobles de prueba compartidos por las pruebas unitarias e de integración.
+
+En términos hexagonales son adaptadores secundarios de prueba: implementan los mismos
+puertos de salida que SQLite y el reloj del sistema (Cockburn, 2005).
+"""
+from avistamientos.hexagono.puertos import Reloj, RepositorioDeAvistamientos
 
 
-class RelojFijo:
+class RelojFijo(Reloj):
     """STUB: devuelve siempre la misma fecha. Hace determinista la regla "no posterior a hoy"."""
 
     def __init__(self, fecha):
@@ -11,7 +16,7 @@ class RelojFijo:
         return self._fecha
 
 
-class RepositorioEnMemoria:
+class RepositorioEnMemoria(RepositorioDeAvistamientos):
     """FAKE: implementación funcional (dict) con la misma interfaz que RepositorioSQLite."""
 
     def __init__(self):

@@ -5,7 +5,7 @@ Cada caso se ejecuta contra las dos implementaciones.
 """
 import pytest
 
-from repositorio import RepositorioSQLite
+from avistamientos.adaptadores.secundarios.repositorio_sqlite import RepositorioSQLite
 from tests.dobles import RepositorioEnMemoria
 
 DATOS = {'especie': 'Colibrí', 'lugar': 'Bogotá', 'fecha': '2026-09-29', 'observador': 'Ana'}

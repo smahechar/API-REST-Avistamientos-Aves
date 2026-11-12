@@ -9,9 +9,10 @@ from unittest.mock import Mock
 
 import pytest
 
-from servicio import NoEncontrado, ServicioDeAvistamientos
+from avistamientos.hexagono.errores import ErrorDeValidacion, NoEncontrado
+from avistamientos.hexagono.servicio import ServicioDeAvistamientos
+from avistamientos.hexagono.validacion import ValidadorDeAvistamiento
 from tests.dobles import RelojFijo, RepositorioEnMemoria
-from validador import ErrorDeValidacion, ValidadorDeAvistamiento
 
 VALIDO = {'especie': 'Colibrí', 'lugar': 'Bogotá', 'fecha': '2026-09-29', 'observador': 'Ana'}
 

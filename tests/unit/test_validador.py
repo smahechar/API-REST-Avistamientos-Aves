@@ -7,8 +7,9 @@ from datetime import date
 
 import pytest
 
+from avistamientos.hexagono.errores import ErrorDeValidacion
+from avistamientos.hexagono.validacion import ValidadorDeAvistamiento
 from tests.dobles import RelojFijo
-from validador import ErrorDeValidacion, ValidadorDeAvistamiento
 
 HOY = date(2026, 10, 21)
 
