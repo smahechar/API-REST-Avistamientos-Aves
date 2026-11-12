@@ -1,0 +1,37 @@
+============================= test session starts =============================
+platform win32 -- Python 3.14.6, pytest-9.2.0, pluggy-1.7.0
+rootdir: C:\Users\aulainformatica\API-REST-Avistamientos-Aves
+configfile: pytest.ini
+testpaths: tests
+plugins: cov-7.1.0
+collected 103 items
+
+tests\integration\test_api_http.py ...........................           [ 26%]
+tests\integration\test_repositorio_contrato.py ..........                [ 35%]
+tests\test_api.py ..                                                     [ 37%]
+tests\unit\test_arquitectura.py .......                                  [ 44%]
+tests\unit\test_servicio.py ...........                                  [ 55%]
+tests\unit\test_validador.py ........................................... [ 97%]
+...                                                                      [100%]
+
+=============================== tests coverage ================================
+_______________ coverage: platform win32, python 3.14.6-final-0 _______________
+
+Name                                                          Stmts   Miss Branch BrPart  Cover   Missing
+---------------------------------------------------------------------------------------------------------
+app.py                                                           20      1      4      1    92%   39
+avistamientos\__init__.py                                         0      0      0      0   100%
+avistamientos\adaptadores\__init__.py                             0      0      0      0   100%
+avistamientos\adaptadores\primarios\__init__.py                   0      0      0      0   100%
+avistamientos\adaptadores\primarios\http_flask.py                37      0      2      1    97%   18->21
+avistamientos\adaptadores\secundarios\__init__.py                 0      0      0      0   100%
+avistamientos\adaptadores\secundarios\reloj_sistema.py            5      0      0      0   100%
+avistamientos\adaptadores\secundarios\repositorio_sqlite.py      47      0      2      0   100%
+avistamientos\hexagono\__init__.py                                0      0      0      0   100%
+avistamientos\hexagono\errores.py                                 6      0      0      0   100%
+avistamientos\hexagono\puertos.py                                31      0      0      0   100%
+avistamientos\hexagono\servicio.py                               26      0      4      0   100%
+avistamientos\hexagono\validacion.py                             35      0     12      0   100%
+---------------------------------------------------------------------------------------------------------
+TOTAL                                                           207      1     24      2    99%
+============================= 103 passed in 1.75s =============================

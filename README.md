@@ -1,6 +1,6 @@
 # API REST de avistamientos de aves
 
-Trabajo individual de Ingeniería de Software 2 (sesión 17), ampliado con pruebas unitarias y de integración en el taller de la sesión 22. API desarrollada con Python, Flask y SQLite. La base de datos se crea automáticamente al iniciar.
+Trabajo individual de Ingeniería de Software 2 (sesión 17), ampliado con pruebas unitarias y de integración en el taller de la sesión 22 y reorganizado con arquitectura hexagonal en el taller 5. API desarrollada con Python, Flask y SQLite. La base de datos se crea automáticamente al iniciar.
 
 ## Requisitos
 
@@ -110,15 +110,23 @@ Si no es válido, `POST` y `PUT` responden **400** con el campo que falló:
 {"campo": "especie", "error": "especie: debe tener entre 3 y 50 caracteres."}
 ```
 
-## Estructura del código
+## Estructura del código (arquitectura hexagonal)
 
-| Archivo | Responsabilidad |
-|---|---|
-| `app.py` | Capa HTTP (rutas y traducción de errores a códigos) |
-| `servicio.py` | Casos de uso: coordina validador y repositorio |
-| `validador.py` | Regla de negocio (`ValidadorDeAvistamiento`), lógica pura |
-| `repositorio.py` | Acceso a SQLite |
-| `reloj.py` | Abstracción de "hoy" (para poder usar un reloj fijo en pruebas) |
+Desde el taller 5 el código sigue la arquitectura hexagonal, o de puertos y adaptadores (Cockburn, 2005). El detalle y el diagrama de dependencias están en [`docs/taller5-arquitectura-hexagonal.md`](docs/taller5-arquitectura-hexagonal.md).
+
+| Archivo | Lado | Responsabilidad |
+|---|---|---|
+| `avistamientos/hexagono/puertos.py` | hexágono | Puerto de entrada `GestionDeAvistamientos` y puertos de salida `RepositorioDeAvistamientos` y `Reloj` |
+| `avistamientos/hexagono/servicio.py` | hexágono | `ServicioDeAvistamientos`: implementa el puerto de entrada |
+| `avistamientos/hexagono/validacion.py` | hexágono | Regla de negocio (`ValidadorDeAvistamiento`), lógica pura |
+| `avistamientos/hexagono/errores.py` | hexágono | `ErrorDeValidacion` y `NoEncontrado` |
+| `avistamientos/adaptadores/primarios/http_flask.py` | adaptador primario | Rutas Flask y traducción de errores a 400/404 |
+| `avistamientos/adaptadores/secundarios/repositorio_sqlite.py` | adaptador secundario | Acceso a SQLite |
+| `avistamientos/adaptadores/secundarios/reloj_sistema.py` | adaptador secundario | Fecha real del sistema |
+| `app.py` | raíz de composición | Conecta cada adaptador con su puerto y arranca Flask |
+| `cargar_ejemplos.py` | adaptador primario | Script por lotes que usa el puerto de entrada |
+
+Regla: nada dentro de `avistamientos/hexagono/` importa Flask, SQLite ni un adaptador. Lo verifica `tests/unit/test_arquitectura.py`.
 
 ## Pruebas automatizadas
 
@@ -141,13 +149,19 @@ Generar el reporte de cobertura (líneas y ramas) en la terminal:
 python -m pytest --cov --cov-report=term-missing
 ```
 
+Muestra reproducible de las respuestas de la API (sirve para comparar antes y después de un refactor):
+
+```bash
+python herramientas/muestra_api.py
+```
+
 Reporte HTML (se abre `htmlcov/index.html`):
 
 ```bash
 python -m pytest --cov --cov-report=html
 ```
 
-La justificación de las decisiones de prueba está en [`docs/justificacion-pruebas.md`](docs/justificacion-pruebas.md).
+La suite tiene 103 pruebas: las 96 del taller de pruebas y 7 de arquitectura. La justificación de las decisiones de prueba está en [`docs/justificacion-pruebas.md`](docs/justificacion-pruebas.md).
 
 ## Base de datos
 
@@ -171,3 +185,5 @@ Reemplaza la URL por la de tu repositorio. Entrega el enlace público.
 ## Uso de IA
 
 Se utilizó **ChatGPT (OpenAI), modelo GPT-6**, como apoyo para generar la estructura inicial, el código, las pruebas y la documentación. El estudiante debe revisar, comprender y responsabilizarse del código que publique.
+
+En el taller 5 (arquitectura hexagonal) se usó **Claude (Anthropic)** como apoyo para planear el refactor por commits y redactar el borrador del documento del taller.
